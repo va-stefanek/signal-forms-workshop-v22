@@ -1,0 +1,39 @@
+<form novalidate>
+  <section class="card">
+    <h2>Attendee</h2>
+    <div class="grid">
+      <!-- TODO 1.2: bind each input with [formField] -->
+      <!-- TODO 1.4: show errors with getError(kind), only after the field was touched -->
+      <!--            (for username use the typed errors: err.minLength, err.maxLength) -->
+      <div class="field">
+        <label for="firstName">First name</label>
+        <input id="firstName" />
+      </div>
+
+      <div class="field">
+        <label for="lastName">Last name</label>
+        <input id="lastName" />
+      </div>
+
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" type="email" />
+      </div>
+
+      <div class="field">
+        <label for="username">Username</label>
+        <input id="username" />
+      </div>
+    </div>
+  </section>
+
+  <div class="actions">
+    <!-- TODO 1.5: disable the button while the form is invalid -->
+    <button type="submit" class="primary">Register</button>
+  </div>
+</form>
+
+<section class="card spaced">
+  <h2>Model preview</h2>
+  <pre class="preview">{{ attendeeModel() | json }}</pre>
+</section>

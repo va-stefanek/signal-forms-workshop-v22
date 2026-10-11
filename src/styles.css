@@ -1,0 +1,201 @@
+/*
+ * Global styles: tokens, form controls and the classes shared by several components.
+ * Component-specific styles live next to each component (*.css, styleUrl).
+ * Class names used by the tests stay as they are: .required-mark, .banner.err, .is-invalid, .is-valid.
+ */
+
+:root {
+  --bg: #f5f3ef;
+  --surface: #ffffff;
+  --surface-sunken: #f9f8f5;
+  --ink: #1f1c26;
+  --muted: #615c6e;
+  --line: #ddd8cf;
+  --line-strong: #c7c0b4;
+  --accent: #c2255c;
+  --accent-hover: #a51d4d;
+  --accent-soft: #fbe7ee;
+  --accent-ink: #ffffff;
+  --ok: #2b7a4b;
+  --ok-soft: #e3f2e8;
+  --err: #b8323c;
+  --err-soft: #fae3e3;
+  --warn: #9a6a00;
+  --warn-soft: #fbf1d6;
+  --focus: 0 0 0 3px rgb(194 37 92 / 0.22);
+  --shadow: 0 1px 2px rgb(31 28 38 / 0.04), 0 4px 16px rgb(31 28 38 / 0.06);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  accent-color: var(--accent);
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; }
+h1, h2, h3 { line-height: 1.2; letter-spacing: -0.01em; }
+a { color: var(--accent); }
+
+/* ---------- Layout ---------- */
+
+.page { max-width: 920px; margin: 0 auto; padding: 0 20px 96px; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px;
+  margin-bottom: 20px;
+}
+.card > h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 18px;
+  font-size: 18px;
+}
+.card > h2::before {
+  content: '';
+  width: 4px;
+  height: 18px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px 16px; }
+.spaced { margin-top: 18px; }
+
+.actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+
+/* ---------- Fields ---------- */
+
+.field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.field label, .field legend { font-weight: 600; font-size: 14px; }
+.field .hint { font-size: 13px; color: var(--muted); }
+.required-mark { color: var(--accent); margin-left: 3px; }
+
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+legend { padding: 0; margin-bottom: 6px; }
+
+input[type='text'], input[type='email'], input[type='tel'], input[type='number'],
+input[type='password'], input[type='date'], input:not([type]), select, textarea {
+  font: inherit;
+  color: inherit;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+input:hover:not(:disabled), select:hover:not(:disabled), textarea:hover:not(:disabled) { border-color: var(--muted); }
+input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: var(--focus);
+}
+input:disabled, select:disabled, textarea:disabled { background: #efede9; color: var(--muted); cursor: not-allowed; }
+input::placeholder { color: #a39d93; }
+
+input[type='radio'], input[type='checkbox'] { width: 18px; height: 18px; margin: 0; flex: none; }
+
+/* Classes added by provideSignalFormsConfig (Step 5) and by custom controls */
+.is-invalid, [aria-invalid='true'] { border-color: var(--err) !important; }
+.is-invalid:focus-visible, [aria-invalid='true']:focus-visible { box-shadow: 0 0 0 3px rgb(184 50 60 / 0.2); }
+.is-valid { border-color: var(--ok) !important; }
+
+.error { display: flex; align-items: baseline; gap: 6px; color: var(--err); font-size: 13px; }
+.error::before { content: '!'; display: inline-grid; place-items: center; width: 15px; height: 15px; border-radius: 50%; background: var(--err); color: #fff; font-size: 11px; font-weight: 700; flex: none; transform: translateY(2px); }
+
+.status { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+.status.ok { color: var(--ok); }
+.status.ok::before { content: '✓'; font-weight: 700; }
+
+/* Radio and checkbox rows */
+.option {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.option:hover { background: var(--surface-sunken); }
+.option:has(input:checked) { background: var(--accent-soft); border-color: rgb(194 37 92 / 0.35); }
+.option:has(input:focus-visible) { box-shadow: var(--focus); }
+.option small { color: var(--muted); }
+
+/* ---------- Buttons ---------- */
+
+button {
+  font: inherit;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  padding: 9px 16px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.05s;
+}
+button:hover:not(:disabled) { background: var(--surface-sunken); border-color: var(--muted); }
+button:active:not(:disabled) { transform: translateY(1px); }
+button:focus-visible { outline: none; box-shadow: var(--focus); }
+button:disabled { opacity: 0.55; cursor: not-allowed; }
+
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; padding: 11px 22px; }
+button.primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); }
+
+button.link { border: none; background: none; color: var(--accent); padding: 4px 2px; font-size: 13px; font-weight: 600; }
+button.link:hover:not(:disabled) { background: none; text-decoration: underline; }
+
+/* Segmented control: app sections and new/edit switch */
+.tabs { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; margin-bottom: 20px; background: #ebe7df; border-radius: 10px; align-items: center; }
+.tabs button { border: none; background: transparent; padding: 7px 14px; }
+.tabs button:hover:not(:disabled):not([aria-pressed='true']) { background: rgb(255 255 255 / 0.6); }
+.tabs button[aria-pressed='true'] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgb(31 28 38 / 0.12); font-weight: 600; }
+.tabs .status { padding: 0 8px; }
+
+/* ---------- Feedback ---------- */
+
+.banner { padding: 12px 16px; border-radius: var(--radius-sm); margin-bottom: 16px; border-left: 4px solid; }
+.banner.ok { background: var(--ok-soft); color: #1d5a37; border-color: var(--ok); }
+.banner.err { background: var(--err-soft); color: #8a1f28; border-color: var(--err); }
+
+pre.preview {
+  background: #1d1a26;
+  color: #ebe8f2;
+  padding: 16px;
+  border-radius: var(--radius-sm);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+  overflow: auto;
+  max-height: 360px;
+  margin: 0;
+}
+
+/* Placeholder rendered by not-yet-implemented TODO components */
+.todo { border: 2px dashed var(--warn); background: var(--warn-soft); color: var(--warn); padding: 12px; border-radius: var(--radius-sm); font-size: 14px; }
+
+/* ---------- Small screens and motion ---------- */
+
+@media (max-width: 600px) {
+  .page { padding: 0 12px 64px; }
+  .card { padding: 18px; }
+  .actions > button.primary { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
