@@ -1,4 +1,16 @@
-import { apply, email, maxLength, minLength, pattern, required, schema } from '@angular/forms/signals';
+import {
+  apply,
+  applyWhen,
+  applyWhenValue,
+  email,
+  maxLength,
+  minLength,
+  pattern,
+  required,
+  schema,
+  validate,
+  validateHttp,
+} from '@angular/forms/signals';
 import { CompanyData } from '../../api/models';
 import { AttendeeForm, RegistrationForm } from './registration-form.model';
 
@@ -12,33 +24,67 @@ export const attendeeSchema = schema<AttendeeForm>((a) => {
   maxLength(a.username, 20);
   pattern(a.username, /^[a-z0-9_]+$/, { message: 'Use lowercase letters, digits and _ only' });
 
-  // TODO 3.1 cross-field: confirmEmail is required (message 'Repeat your email') and must equal email
-  //          error kind: 'emailMismatch', message 'Emails do not match'
+  // Cross-field: depends on a.email, re-runs automatically when it changes
+  required(a.confirmEmail, { message: 'Repeat your email' });
+  validate(a.confirmEmail, ({ value, valueOf }) =>
+    value() && value() !== valueOf(a.email)
+      ? { kind: 'emailMismatch', message: 'Emails do not match' }
+      : null,
+  );
 });
 
-/**
- * TODO 3.5: company data rules (all required, nip = 10 digits, postalCode = 00-000)
- */
-export const companySchema = schema<CompanyData>((c) => {});
+export const companySchema = schema<CompanyData>((c) => {
+  required(c.name, { message: 'Company name is required' });
+  required(c.nip, { message: 'NIP is required' });
+  pattern(c.nip, /^\d{10}$/, { message: 'NIP has 10 digits' });
+  required(c.street, { message: 'Street is required' });
+  required(c.city, { message: 'City is required' });
+  required(c.postalCode, { message: 'Postal code is required' });
+  pattern(c.postalCode, /^\d{2}-\d{3}$/, { message: 'Format: 00-000' });
+});
 
 export const registrationSchema = schema<RegistrationForm>((f) => {
   apply(f.attendee, attendeeSchema);
 
-  // TODO 3.2 async: validateHttp on f.attendee.username
-  //   GET /api/usernames/:name/availability -> { available: boolean }
-  //   - skip the request (return undefined) unless the username matches /^[a-z0-9_]{3,20}$/
-  //   - when editing (f.id has a value) add ?registrationId=<id> so your own username is available
-  //   - debounce 400 ms
-  //   - kinds: 'usernameTaken' when not available, 'usernameCheckFailed' on error
+  // Async: only when the username is syntactically valid; debounced; own username is fine when editing
+  validateHttp(f.attendee.username, {
+    request: ({ value, valueOf }) => {
+      const username = value();
+      if (!/^[a-z0-9_]{3,20}$/.test(username)) {
+        return undefined;
+      }
+      const id = valueOf(f.id);
+      const url = `/api/usernames/${encodeURIComponent(username)}/availability`;
+      return id ? `${url}?registrationId=${encodeURIComponent(id)}` : url;
+    },
+    debounce: 400,
+    onSuccess: (response: { available: boolean }) =>
+      response.available ? null : { kind: 'usernameTaken', message: 'This username is already taken' },
+    onError: () => ({ kind: 'usernameCheckFailed', message: 'Could not check the username, try again' }),
+  });
 
-  // TODO 3.3 group rule: at least 2 sessions chosen in f.agenda (kind: 'minSessions')
+  // Group-level rule on the agenda array
+  validate(f.agenda, ({ value }) =>
+    value().filter((slot) => slot.sessionId).length < 2
+      ? { kind: 'minSessions', message: 'Choose at least 2 sessions' }
+      : null,
+  );
 
-  // TODO 3.4 payment:
-  //   - method is required
-  //   - card branch only when method === 'card': all required, number 16 digits, expiry MM/YY
-  //   - transfer branch only when method === 'transfer': all required, IBAN /^PL\d{26}$/
-  //   hint: applyWhenValue(f.payment, ...)
+  // Static structure + conditional rules: only the active branch is validated
+  required(f.payment.method, { message: 'Choose a payment method' });
+  applyWhenValue(f.payment, (payment) => payment.method === 'card', (p) => {
+    required(p.card.cardholderName, { message: 'Cardholder name is required' });
+    required(p.card.cardNumber, { message: 'Card number is required' });
+    pattern(p.card.cardNumber, /^\d{16}$/, { message: 'Card number has 16 digits' });
+    required(p.card.expiry, { message: 'Expiry date is required' });
+    pattern(p.card.expiry, /^(0[1-9]|1[0-2])\/\d{2}$/, { message: 'Use MM/YY' });
+  });
+  applyWhenValue(f.payment, (payment) => payment.method === 'transfer', (p) => {
+    required(p.transfer.payerName, { message: 'Payer name is required' });
+    required(p.transfer.iban, { message: 'IBAN is required' });
+    pattern(p.transfer.iban, /^PL\d{26}$/, { message: 'Polish IBAN: PL followed by 26 digits' });
+  });
 
-  // TODO 3.5 invoice: apply companySchema to f.invoice only when f.wantsInvoice is true
-  //   hint: the condition lives in ANOTHER field, so it is applyWhen, not applyWhenValue
+  // Condition depends on ANOTHER field (wantsInvoice), so applyWhen instead of applyWhenValue
+  applyWhen(f.invoice, ({ valueOf }) => valueOf(f.wantsInvoice), companySchema);
 });

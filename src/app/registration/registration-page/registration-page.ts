@@ -44,17 +44,30 @@ export class RegistrationPage {
     },
   });
 
-  /**
-   * TODO 3.6: add a third argument to form() with `submission`:
-   *   action:    save formToDomain(value) with this.api.save(); on success set lastSaved
-   *              and registrationId and return null; on error return serverErrorsToTree(error, f)
-   *   onInvalid: focus the first field from errorSummary() with focusBoundControl()
-   * The template already uses [formRoot], so the submit button will call it.
-   */
-  readonly registrationForm = form(this.model, (f) => {
-    disabled(f, { when: () => this.loading() });
-    apply(f, registrationSchema);
-  });
+  readonly registrationForm = form(
+    this.model,
+    (f) => {
+      disabled(f, { when: () => this.loading() });
+      apply(f, registrationSchema);
+    },
+    {
+      submission: {
+        action: async (f) => {
+          try {
+            const saved = await this.api.save(formToDomain(f().value()));
+            this.lastSaved.set(saved);
+            this.registrationId.set(saved.id);
+            return null;
+          } catch (error) {
+            return serverErrorsToTree(error, f);
+          }
+        },
+        onInvalid: (f) => {
+          f().errorSummary()[0]?.fieldTree().focusBoundControl();
+        },
+      },
+    },
+  );
 
   readonly domainPreview = computed(() => formToDomain(this.model()));
 
@@ -63,8 +76,9 @@ export class RegistrationPage {
     this.registrationForm().errors().filter((e) => e.fieldTree === this.registrationForm),
   );
 
-  /** TODO 3.7: re-run the async username check without changing the value */
-  recheckUsername(): void {}
+  recheckUsername(): void {
+    this.registrationForm.attendee.username().reloadValidation();
+  }
 
   /** Demo for reloadValidation(): the value did not change, the server state did */
   async simulateUsernameTakenElsewhere(): Promise<void> {
