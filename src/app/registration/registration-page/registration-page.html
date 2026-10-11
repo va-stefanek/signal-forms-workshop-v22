@@ -1,66 +1,132 @@
+@let f = registrationForm;
+
+<div class="tabs">
+  <button type="button" [attr.aria-pressed]="registrationId() === null" (click)="registrationId.set(null)">New registration</button>
+  <button type="button" [attr.aria-pressed]="registrationId() === '42'" (click)="registrationId.set('42')">Edit registration #42</button>
+  @if (loading()) { <span class="status">Loading…</span> }
+</div>
+
 <form novalidate>
   <section class="card">
     <h2>Attendee</h2>
     <div class="grid">
       <div class="field">
         <label for="firstName">First name</label>
-        <input id="firstName" [formField]="attendeeForm.firstName" />
-        @if (attendeeForm.firstName().touched() && attendeeForm.firstName().getError('required'); as err) {
-          <span class="error">{{ err.message }}</span>
-        }
+        <input id="firstName" [formField]="f.attendee.firstName" />
+        <app-field-errors [field]="f.attendee.firstName" />
       </div>
-
       <div class="field">
         <label for="lastName">Last name</label>
-        <input id="lastName" [formField]="attendeeForm.lastName" />
-        @if (attendeeForm.lastName().touched() && attendeeForm.lastName().getError('required'); as err) {
-          <span class="error">{{ err.message }}</span>
-        }
+        <input id="lastName" [formField]="f.attendee.lastName" />
+        <app-field-errors [field]="f.attendee.lastName" />
       </div>
-
       <div class="field">
         <label for="email">Email</label>
-        <input id="email" type="email" [formField]="attendeeForm.email" />
-        @let emailField = attendeeForm.email();
-        @if (emailField.touched()) {
-          @if (emailField.getError('required'); as err) {
-            <span class="error">{{ err.message }}</span>
-          } @else if (emailField.getError('email'); as err) {
-            <span class="error">{{ err.message }}</span>
-          }
-        }
+        <input id="email" type="email" [formField]="f.attendee.email" />
+        <app-field-errors [field]="f.attendee.email" />
       </div>
-
+      <div class="field">
+        <label for="confirmEmail">Repeat email</label>
+        <input id="confirmEmail" type="email" [formField]="f.attendee.confirmEmail" />
+        <app-field-errors [field]="f.attendee.confirmEmail" />
+      </div>
       <div class="field">
         <label for="username">Username</label>
-        <input id="username" [formField]="attendeeForm.username" />
-        @let usernameField = attendeeForm.username();
-        @if (usernameField.touched()) {
-          @if (usernameField.getError('required'); as err) {
-            <span class="error">{{ err.message }}</span>
-          }
-          <!-- getError() narrows the type: minLength / maxLength are available -->
-          @if (usernameField.getError('minLength'); as err) {
-            <span class="error">At least {{ err.minLength }} characters</span>
-          }
-          @if (usernameField.getError('maxLength'); as err) {
-            <span class="error">At most {{ err.maxLength }} characters</span>
-          }
-          @if (usernameField.getError('pattern'); as err) {
-            <span class="error">{{ err.message }}</span>
-          }
-        }
+        <input id="username" [formField]="f.attendee.username" />
+        <app-field-errors [field]="f.attendee.username" />
       </div>
     </div>
   </section>
 
-  <div class="actions">
-    <button type="submit" class="primary" [disabled]="attendeeForm().invalid()">Register</button>
-    <span class="status">{{ attendeeForm().valid() ? 'Ready to submit' : 'Fill in the required fields' }}</span>
-  </div>
+  <section class="card">
+    <h2>Agenda</h2>
+    @if (agenda.hasValue()) {
+      <app-agenda-picker [slots]="f.agenda" [agenda]="agenda.value()" />
+    }
+    <app-field-errors [field]="f.agenda" />
+  </section>
+
+  <section class="card">
+    <h2>Payment</h2>
+    <div class="actions" role="radiogroup" aria-label="Payment method">
+      <label class="option"><input type="radio" value="card" [formField]="f.payment.method" /> Card</label>
+      <label class="option"><input type="radio" value="transfer" [formField]="f.payment.method" /> Bank transfer</label>
+    </div>
+    <app-field-errors [field]="f.payment.method" />
+
+    @switch (f.payment.method().value()) {
+      @case ('card') {
+        <div class="grid spaced">
+          <div class="field">
+            <label for="cardholderName">Cardholder name</label>
+            <input id="cardholderName" [formField]="f.payment.card.cardholderName" />
+            <app-field-errors [field]="f.payment.card.cardholderName" />
+          </div>
+          <div class="field">
+            <label for="cardNumber">Card number</label>
+            <input id="cardNumber" inputmode="numeric" [formField]="f.payment.card.cardNumber" />
+            <app-field-errors [field]="f.payment.card.cardNumber" />
+          </div>
+          <div class="field">
+            <label for="expiry">Expiry (MM/YY)</label>
+            <input id="expiry" [formField]="f.payment.card.expiry" />
+            <app-field-errors [field]="f.payment.card.expiry" />
+          </div>
+        </div>
+      }
+      @case ('transfer') {
+        <div class="grid spaced">
+          <div class="field">
+            <label for="payerName">Payer name</label>
+            <input id="payerName" [formField]="f.payment.transfer.payerName" />
+            <app-field-errors [field]="f.payment.transfer.payerName" />
+          </div>
+          <div class="field">
+            <label for="iban">IBAN</label>
+            <input id="iban" [formField]="f.payment.transfer.iban" />
+            <app-field-errors [field]="f.payment.transfer.iban" />
+          </div>
+        </div>
+      }
+    }
+  </section>
+
+  <section class="card">
+    <h2>Invoice</h2>
+    <label class="option"><input type="checkbox" [formField]="f.wantsInvoice" /> I need an invoice</label>
+    @if (f.wantsInvoice().value()) {
+      <div class="grid spaced">
+        <div class="field">
+          <label for="companyName">Company name</label>
+          <input id="companyName" [formField]="f.invoice.name" />
+          <app-field-errors [field]="f.invoice.name" />
+        </div>
+        <div class="field">
+          <label for="nip">NIP</label>
+          <input id="nip" [formField]="f.invoice.nip" />
+          <app-field-errors [field]="f.invoice.nip" />
+        </div>
+        <div class="field">
+          <label for="street">Street</label>
+          <input id="street" [formField]="f.invoice.street" />
+          <app-field-errors [field]="f.invoice.street" />
+        </div>
+        <div class="field">
+          <label for="city">City</label>
+          <input id="city" [formField]="f.invoice.city" />
+          <app-field-errors [field]="f.invoice.city" />
+        </div>
+        <div class="field">
+          <label for="postalCode">Postal code</label>
+          <input id="postalCode" [formField]="f.invoice.postalCode" />
+          <app-field-errors [field]="f.invoice.postalCode" />
+        </div>
+      </div>
+    }
+  </section>
 </form>
 
-<section class="card spaced">
-  <h2>Model preview</h2>
-  <pre class="preview">{{ attendeeModel() | json }}</pre>
+<section class="card">
+  <h2>What the API would receive</h2>
+  <pre class="preview">{{ domainPreview() | json }}</pre>
 </section>

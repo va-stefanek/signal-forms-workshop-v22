@@ -1,36 +1,43 @@
-import { Component, signal } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { FormField, email, form, maxLength, minLength, pattern, required } from '@angular/forms/signals';
-import { Attendee } from '../../api/models';
-
-/**
- * STEP 1: the form model IS the domain model (on purpose).
- * Step 2 shows where that stops working.
- */
-export const EMPTY_ATTENDEE: Attendee = {
-  firstName: '',
-  lastName: '',
-  email: '',
-  username: '',
-  phone: null,
-};
+import { httpResource } from '@angular/common/http';
+import { FormField, apply, form } from '@angular/forms/signals';
+import { Agenda, Registration } from '../../api/models';
+import { FieldErrors } from '../../shared/field-errors/field-errors';
+import { AgendaPicker } from '../agenda-picker/agenda-picker';
+import { RegistrationForm, emptyRegistrationForm, formToDomain } from '../form/registration-form.model';
+import { registrationSchema } from '../form/registration.schema';
 
 @Component({
   selector: 'app-registration-page',
-  imports: [FormField, JsonPipe],
+  imports: [FormField, JsonPipe, FieldErrors, AgendaPicker],
   templateUrl: './registration-page.html',
 })
 export class RegistrationPage {
-  protected readonly attendeeModel = signal<Attendee>({ ...EMPTY_ATTENDEE });
+  /** null = new registration, otherwise the id to edit (try "42") */
+  readonly registrationId = signal<string | null>(null);
 
-  readonly attendeeForm = form(this.attendeeModel, (a) => {
-    required(a.firstName, { message: 'First name is required' });
-    required(a.lastName, { message: 'Last name is required' });
-    required(a.email, { message: 'Email is required' });
-    email(a.email, { message: 'Enter a valid email address' });
-    required(a.username, { message: 'Username is required' });
-    minLength(a.username, 3);
-    maxLength(a.username, 20);
-    pattern(a.username, /^[a-z0-9_]+$/, { message: 'Use lowercase letters, digits and _ only' });
+  readonly agenda = httpResource<Agenda>(() => '/api/agenda');
+  readonly registration = httpResource<Registration>(() => {
+    const id = this.registrationId();
+    return id ? `/api/registrations/${id}` : undefined;
   });
+
+  readonly loading = computed(() => this.agenda.isLoading() || this.registration.isLoading());
+
+  /**
+   * TODO 2.4: replace this signal with a linkedSignal that is recomputed from
+   * agenda.value() and (when registrationId is set) registration.value():
+   *   registration loaded -> domainToForm(registration, agenda)
+   *   otherwise           -> emptyRegistrationForm(agenda ?? { slots: [] })
+   */
+  readonly model = signal<RegistrationForm>(emptyRegistrationForm({ slots: [] }));
+
+  // TODO 2.5: disable the whole form while loading() is true (use { when })
+  readonly registrationForm = form(this.model, (f) => {
+    apply(f, registrationSchema);
+  });
+
+  /** What would be sent to the API right now */
+  readonly domainPreview = computed(() => formToDomain(this.model()));
 }

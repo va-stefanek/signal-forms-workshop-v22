@@ -1,0 +1,19 @@
+@for (slotField of slots(); track slotField) {
+  @let slot = slotById().get(slotField.slotId().value());
+  @if (slot) {
+    <div class="slot" role="radiogroup" [attr.aria-label]="'Sessions ' + (slot.startsAt | date: 'HH:mm')">
+      <div class="slot-time">
+        {{ slot.startsAt | date: 'HH:mm' }} to {{ slot.endsAt | date: 'HH:mm' }}
+        @if (slotField.sessionId().value()) {
+          <button type="button" class="link" (click)="slotField.sessionId().value.set('')">clear</button>
+        }
+      </div>
+      @for (session of slot.sessions; track session.id) {
+        <label class="option">
+          <input type="radio" [value]="session.id" [formField]="slotField.sessionId" />
+          <span>{{ session.title }} <small>{{ session.speaker }}, {{ session.track }}</small></span>
+        </label>
+      }
+    </div>
+  }
+}

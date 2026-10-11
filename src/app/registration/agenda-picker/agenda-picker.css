@@ -1,0 +1,21 @@
+:host { display: block; }
+
+.slot { padding: 14px 0; border-top: 1px solid var(--line); }
+.slot:first-of-type { border-top: none; padding-top: 0; }
+
+.slot-time {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.option { align-items: flex-start; }
+.option input { margin-top: 2px; }
+.option span { display: flex; flex-direction: column; gap: 2px; font-weight: 500; }
+.option small { font-size: 13px; font-weight: 400; }
