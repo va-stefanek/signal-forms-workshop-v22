@@ -57,6 +57,7 @@ export function emptyPerson(): Person {
   return { firstName: '', lastName: '', email: '' };
 }
 
+/** Task 2.1 (exercises/step-2.md): an empty form with one { slotId, sessionId: '' } entry per agenda slot */
 export function emptyRegistrationForm(agenda: Agenda): RegistrationForm {
   return {
     id: null,
@@ -69,6 +70,13 @@ export function emptyRegistrationForm(agenda: Agenda): RegistrationForm {
   };
 }
 
+/**
+ * Task 2.2 (exercises/step-2.md): API -> form
+ *  - sessionIds (flat list) -> one entry per agenda slot
+ *  - confirmEmail starts equal to email
+ *  - payment union -> static PaymentForm (fill the active branch, keep the other one empty)
+ *  - optional invoice -> wantsInvoice + always-present invoice
+ */
 export function domainToForm(registration: Registration, agenda: Agenda): RegistrationForm {
   const { attendee, payment, invoice } = registration;
   return {
@@ -85,6 +93,13 @@ export function domainToForm(registration: Registration, agenda: Agenda): Regist
   };
 }
 
+/**
+ * Task 2.3 (exercises/step-2.md): form -> API
+ *  - drop confirmEmail
+ *  - agenda entries -> sessionIds (skip empty slots)
+ *  - only the active payment branch, or null
+ *  - include `invoice` only when wantsInvoice is true (no `invoice: undefined` key)
+ */
 export function formToDomain(form: RegistrationForm): Registration {
   const { confirmEmail, ...attendee } = form.attendee;
   const registration: Registration = {

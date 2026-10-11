@@ -34,6 +34,10 @@ export class RegistrationPage {
 
   readonly loading = computed(() => this.agenda.isLoading() || this.registration.isLoading());
 
+  /**
+   * Task 2.4 (exercises/step-2.md): the form model is derived from two resources.
+   * Recomputed when the agenda or the loaded registration changes; user edits stay until then.
+   */
   readonly model = linkedSignal<
     { agenda: Agenda | undefined; registration: Registration | undefined },
     RegistrationForm
@@ -51,10 +55,12 @@ export class RegistrationPage {
   readonly registrationForm = form(
     this.model,
     (f) => {
+      // Task 2.5 (exercises/step-2.md): the whole form is disabled while loading
       disabled(f, { when: () => this.loading() });
       apply(f, registrationSchema);
     },
     {
+      // Task 3.6 (exercises/step-3.md): save, map server errors onto fields, focus the first invalid field
       submission: {
         action: async (f) => {
           try {

@@ -39,7 +39,12 @@ export class NewsletterSignup {
       required(f.track, { message: 'Choose a track' });
     },
     {
-      // STRETCH 5.5 (exercises/step-5.md, experimental): add experimentalWebMcpTool { name, description, annotations } here
+      // STRETCH 5.5 (exercises/step-5.md, experimental): lets an in-browser agent fill and submit this form via WebMCP
+      experimentalWebMcpTool: {
+        name: 'subscribe_to_signal_conf_newsletter',
+        description: `Subscribes a person to the Signal Conf newsletter. track is one of: ${TRACKS.map((t) => t.id).join(', ')}`,
+        annotations: { consequentialHint: true },
+      },
       submission: {
         action: async (f) => {
           this.subscribed.set(f().value());

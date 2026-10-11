@@ -5,6 +5,7 @@ import {
   applyWhenValue,
   email,
   maxLength,
+  metadata,
   minLength,
   pattern,
   required,
@@ -13,11 +14,12 @@ import {
   validateHttp,
 } from '@angular/forms/signals';
 import { CompanyData, Person } from '../../api/models';
+import { HINT } from '../../shared/hint';
 import { AttendeeForm, RegistrationForm } from './registration-form.model';
 
 export const MAX_COMPANIONS = 3;
 
-/** Reused for the attendee AND every companion */
+/** Task 4.1 (exercises/step-4.md): reused for the attendee AND every companion (rules from Task 1.1) */
 export const personSchema = schema<Person>((p) => {
   required(p.firstName, { message: 'First name is required' });
   required(p.lastName, { message: 'Last name is required' });
@@ -27,13 +29,16 @@ export const personSchema = schema<Person>((p) => {
 
 export const attendeeSchema = schema<AttendeeForm>((a) => {
   apply(a, personSchema);
+  // Task 1.1 (exercises/step-1.md): username required, 3 to 20 characters, /^[a-z0-9_]+$/
   required(a.username, { message: 'Username is required' });
   minLength(a.username, 3);
   maxLength(a.username, 20);
   pattern(a.username, /^[a-z0-9_]+$/, { message: 'Use lowercase letters, digits and _ only' });
-  // TODO 5.4: HINT metadata (shared/hint.ts) for username and phone
+  // Task 5.4 (exercises/step-5.md): hints shown BEFORE the user makes a mistake
+  metadata(a.username, HINT, () => '3 to 20 characters: a-z, 0-9 and _');
+  metadata(a.phone, HINT, () => '9 digits for Poland, or +country code');
 
-  // Cross-field: depends on a.email, re-runs automatically when it changes
+  // Task 3.1 (exercises/step-3.md). Cross-field: depends on a.email, re-runs automatically when it changes
   required(a.confirmEmail, { message: 'Repeat your email' });
   validate(a.confirmEmail, ({ value, valueOf }) =>
     value() && value() !== valueOf(a.email)
@@ -42,11 +47,12 @@ export const attendeeSchema = schema<AttendeeForm>((a) => {
   );
 });
 
+/** Task 3.5 (exercises/step-3.md): company data rules; NIP hint from Task 5.4 */
 export const companySchema = schema<CompanyData>((c) => {
   required(c.name, { message: 'Company name is required' });
   required(c.nip, { message: 'NIP is required' });
   pattern(c.nip, /^\d{10}$/, { message: 'NIP has 10 digits' });
-  // TODO 5.4: HINT metadata for nip
+  metadata(c.nip, HINT, () => 'Polish tax id, the checksum is verified');
   required(c.street, { message: 'Street is required' });
   required(c.city, { message: 'City is required' });
   required(c.postalCode, { message: 'Postal code is required' });
@@ -56,7 +62,7 @@ export const companySchema = schema<CompanyData>((c) => {
 export const registrationSchema = schema<RegistrationForm>((f) => {
   apply(f.attendee, attendeeSchema);
 
-  // Async: only when the username is syntactically valid; debounced; own username is fine when editing
+  // Task 3.2 (exercises/step-3.md). Async: only when the username is syntactically valid; debounced; own username is fine when editing
   validateHttp(f.attendee.username, {
     request: ({ value, valueOf }) => {
       const username = value();
@@ -73,7 +79,7 @@ export const registrationSchema = schema<RegistrationForm>((f) => {
     onError: () => ({ kind: 'usernameCheckFailed', message: 'Could not check the username, try again' }),
   });
 
-  // Arrays: the same schema for every item, plus rules on the array itself
+  // Task 4.4 (exercises/step-4.md). Arrays: the same schema for every item, plus rules on the array itself
   maxLength(f.companions, MAX_COMPANIONS, { message: `At most ${MAX_COMPANIONS} companions` });
   applyEach(f.companions, (companion) => {
     apply(companion, personSchema);
@@ -85,14 +91,14 @@ export const registrationSchema = schema<RegistrationForm>((f) => {
     );
   });
 
-  // Group-level rule on the agenda array
+  // Task 3.3 (exercises/step-3.md). Group-level rule on the agenda array
   validate(f.agenda, ({ value }) =>
     value().filter((slot) => slot.sessionId).length < 2
       ? { kind: 'minSessions', message: 'Choose at least 2 sessions' }
       : null,
   );
 
-  // Static structure + conditional rules: only the active branch is validated
+  // Task 3.4 (exercises/step-3.md). Static structure + conditional rules: only the active branch is validated
   required(f.payment.method, { message: 'Choose a payment method' });
   applyWhenValue(f.payment, (payment) => payment.method === 'card', (p) => {
     required(p.card.cardholderName, { message: 'Cardholder name is required' });
@@ -107,6 +113,6 @@ export const registrationSchema = schema<RegistrationForm>((f) => {
     pattern(p.transfer.iban, /^PL\d{26}$/, { message: 'Polish IBAN: PL followed by 26 digits' });
   });
 
-  // Condition depends on ANOTHER field (wantsInvoice), so applyWhen instead of applyWhenValue
+  // Task 3.5 (exercises/step-3.md). Condition depends on ANOTHER field (wantsInvoice), so applyWhen instead of applyWhenValue
   applyWhen(f.invoice, ({ valueOf }) => valueOf(f.wantsInvoice), companySchema);
 });

@@ -1,11 +1,12 @@
-import { Component, signal } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { email, required } from '@angular/forms/signals';
+import { SignalFormControl } from '@angular/forms/signals/compat';
 
 /**
- * LEGACY reactive form.
- * TODO 5.2: migrate ONLY the email control to SignalFormControl with Signal Forms rules
- * (required + email). Do not touch the template: formControlName and hasError() keep working.
- * Stretch: show the email domain with a computed() over emailControl.sourceValue().
+ * Task 5.2 (exercises/step-5.md). LEGACY reactive form, migrated bottom-up:
+ * `email` is already a SignalFormControl (rules written with Signal Forms),
+ * everything else, including the template, stays as it was.
  */
 @Component({
   selector: 'app-feedback-form',
@@ -13,7 +14,10 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
   templateUrl: './feedback-form.html',
 })
 export class FeedbackForm {
-  readonly emailControl = new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] });
+  readonly emailControl = new SignalFormControl('', (p) => {
+    required(p);
+    email(p);
+  });
 
   readonly feedback = new FormGroup({
     rating: new FormControl<number | null>(null, Validators.required),
@@ -22,6 +26,9 @@ export class FeedbackForm {
   });
 
   readonly sent = signal(false);
+
+  /** sourceValue is a real signal, even inside a reactive FormGroup */
+  protected readonly emailDomain = computed(() => this.emailControl.sourceValue().split('@')[1] ?? '');
 
   send(): void {
     this.feedback.markAllAsTouched();

@@ -5,6 +5,7 @@ import { FieldErrors } from '../../../shared/field-errors/field-errors';
 import { emptyPerson } from '../../form/registration-form.model';
 import { MAX_COMPANIONS } from '../../form/registration.schema';
 
+/** Task 4.3 (exercises/step-4.md): companions list, add/remove through the field's value */
 @Component({
   selector: 'app-companions-fields',
   imports: [FormField, FieldErrors],

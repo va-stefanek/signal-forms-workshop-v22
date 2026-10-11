@@ -9,11 +9,9 @@
     </div>
     <div class="field">
       <label for="nip">NIP</label>
-      <!-- TODO 5.1: replace this input with the legacy <lib-nip-input inputId="nip"> (a ControlValueAccessor
-           from the company library, see legacy/nip-input/) bound with [formField]. Check that its
-           NG_VALIDATORS checksum error shows up on the field. -->
-      <input id="nip" [formField]="c.nip" />
-      <!-- TODO 5.4: show the NIP hint from HINT metadata in a <span class="hint"> here -->
+      <!-- Task 5.1 (exercises/step-5.md): legacy ControlValueAccessor component, bound with [formField] as is -->
+      <lib-nip-input inputId="nip" [formField]="c.nip" />
+      <span class="hint">{{ c.nip().metadata(HINT)?.() }}</span>
       <app-field-errors [field]="c.nip" />
     </div>
     <div class="field">

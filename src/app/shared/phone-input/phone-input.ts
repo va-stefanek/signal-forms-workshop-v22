@@ -1,7 +1,7 @@
 import { Component, ElementRef, input, model, output, viewChild } from '@angular/core';
 import { FormValueControl, ParseResult, transformedValue } from '@angular/forms/signals';
 
-/** "600 700 800" or "+48600700800" -> "+48600700800"; "" -> null; anything else -> parse error */
+/** Task 4.5 (exercises/step-4.md): "600 700 800" or "+48600700800" -> "+48600700800"; "" -> null; anything else -> parse error */
 export function parsePhone(raw: string): ParseResult<string | null> {
   const compact = raw.replace(/[\s-]/g, '');
   if (compact === '') {
@@ -16,7 +16,7 @@ export function parsePhone(raw: string): ParseResult<string | null> {
   return { error: { kind: 'parse', message: 'Use 9 digits or +country code and number' } };
 }
 
-/** "+48600700800" -> "+48 600 700 800" (other countries are shown as stored) */
+/** Task 4.5: "+48600700800" -> "+48 600 700 800" (other countries are shown as stored) */
 export function formatPhone(value: string | null): string {
   if (!value) {
     return '';
@@ -26,7 +26,7 @@ export function formatPhone(value: string | null): string {
 }
 
 /**
- * Custom control: no ControlValueAccessor.
+ * Task 4.6 (exercises/step-4.md). Custom control: no ControlValueAccessor.
  * The model holds E.164 (or null); the input shows what the user types.
  */
 @Component({
