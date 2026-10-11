@@ -1,11 +1,11 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, linkedSignal, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
-import { FormField, apply, form } from '@angular/forms/signals';
+import { FormField, disabled, form, apply } from '@angular/forms/signals';
 import { Agenda, Registration } from '../../api/models';
 import { FieldErrors } from '../../shared/field-errors/field-errors';
 import { AgendaPicker } from '../agenda-picker/agenda-picker';
-import { RegistrationForm, emptyRegistrationForm, formToDomain } from '../form/registration-form.model';
+import { RegistrationForm, domainToForm, emptyRegistrationForm, formToDomain } from '../form/registration-form.model';
 import { registrationSchema } from '../form/registration.schema';
 
 @Component({
@@ -25,16 +25,23 @@ export class RegistrationPage {
 
   readonly loading = computed(() => this.agenda.isLoading() || this.registration.isLoading());
 
-  /**
-   * TODO 2.4: replace this signal with a linkedSignal that is recomputed from
-   * agenda.value() and (when registrationId is set) registration.value():
-   *   registration loaded -> domainToForm(registration, agenda)
-   *   otherwise           -> emptyRegistrationForm(agenda ?? { slots: [] })
-   */
-  readonly model = signal<RegistrationForm>(emptyRegistrationForm({ slots: [] }));
+  /** Form model derived from API data, writable by the form */
+  readonly model = linkedSignal<
+    { agenda: Agenda | undefined; registration: Registration | undefined },
+    RegistrationForm
+  >({
+    source: () => ({
+      agenda: this.agenda.value(),
+      registration: this.registrationId() ? this.registration.value() : undefined,
+    }),
+    computation: ({ agenda, registration }) => {
+      const safeAgenda = agenda ?? { slots: [] };
+      return registration ? domainToForm(registration, safeAgenda) : emptyRegistrationForm(safeAgenda);
+    },
+  });
 
-  // TODO 2.5: disable the whole form while loading() is true (use { when })
   readonly registrationForm = form(this.model, (f) => {
+    disabled(f, { when: () => this.loading() });
     apply(f, registrationSchema);
   });
 

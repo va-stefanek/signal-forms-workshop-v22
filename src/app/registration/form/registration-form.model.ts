@@ -1,10 +1,9 @@
-import { Agenda, CompanyData, Person, Registration } from '../../api/models';
+import { Agenda, CompanyData, Payment, Person, Registration } from '../../api/models';
 
 /**
  * FORM MODEL
  * Shaped for the UI, not for the API. Every field always exists (no undefined),
  * so the field tree is static and nothing typed by the user gets lost.
- * The types are given; your job is the mapping functions below.
  */
 
 export interface AttendeeForm {
@@ -58,38 +57,70 @@ export function emptyPerson(): Person {
   return { firstName: '', lastName: '', email: '' };
 }
 
-/** TODO 2.1: an empty form with one { slotId, sessionId: '' } entry per agenda slot */
 export function emptyRegistrationForm(agenda: Agenda): RegistrationForm {
   return {
     id: null,
     attendee: { firstName: '', lastName: '', email: '', confirmEmail: '', username: '', phone: null },
     companions: [],
-    agenda: [],
+    agenda: agenda.slots.map((slot) => ({ slotId: slot.id, sessionId: '' })),
     payment: structuredClone(EMPTY_PAYMENT),
     wantsInvoice: false,
     invoice: { ...EMPTY_COMPANY },
   };
 }
 
-/**
- * TODO 2.2: API -> form
- *  - sessionIds (flat list) -> one entry per agenda slot
- *  - confirmEmail starts equal to email
- *  - payment union -> static PaymentForm (fill the active branch, keep the other one empty)
- *  - optional invoice -> wantsInvoice + always-present invoice
- */
 export function domainToForm(registration: Registration, agenda: Agenda): RegistrationForm {
-  return emptyRegistrationForm(agenda); // TODO 2.2
+  const { attendee, payment, invoice } = registration;
+  return {
+    id: registration.id,
+    attendee: { ...attendee, confirmEmail: attendee.email },
+    companions: registration.companions.map((c) => ({ ...c })),
+    agenda: agenda.slots.map((slot) => ({
+      slotId: slot.id,
+      sessionId: slot.sessions.find((s) => registration.sessionIds.includes(s.id))?.id ?? '',
+    })),
+    payment: paymentToForm(payment),
+    wantsInvoice: invoice !== undefined,
+    invoice: invoice ? { ...invoice } : { ...EMPTY_COMPANY },
+  };
 }
 
-/**
- * TODO 2.3: form -> API
- *  - drop confirmEmail
- *  - agenda entries -> sessionIds (skip empty slots)
- *  - only the active payment branch, or null
- *  - include `invoice` only when wantsInvoice is true (no `invoice: undefined` key!)
- */
 export function formToDomain(form: RegistrationForm): Registration {
-  // TODO 2.3
-  return { id: form.id, attendee: form.attendee, companions: [], sessionIds: [], payment: null };
+  const { confirmEmail, ...attendee } = form.attendee;
+  const registration: Registration = {
+    id: form.id,
+    attendee,
+    companions: form.companions.map((c) => ({ ...c })),
+    sessionIds: form.agenda.flatMap((slot) => (slot.sessionId ? [slot.sessionId] : [])),
+    payment: paymentToDomain(form.payment),
+  };
+  if (form.wantsInvoice) {
+    registration.invoice = { ...form.invoice };
+  }
+  return registration;
+}
+
+function paymentToForm(payment: Payment | null): PaymentForm {
+  const result = structuredClone(EMPTY_PAYMENT);
+  if (payment?.method === 'card') {
+    const { method, ...card } = payment;
+    result.method = method;
+    result.card = card;
+  } else if (payment?.method === 'transfer') {
+    const { method, ...transfer } = payment;
+    result.method = method;
+    result.transfer = transfer;
+  }
+  return result;
+}
+
+function paymentToDomain(payment: PaymentForm): Payment | null {
+  switch (payment.method) {
+    case 'card':
+      return { method: 'card', ...payment.card };
+    case 'transfer':
+      return { method: 'transfer', ...payment.transfer };
+    default:
+      return null;
+  }
 }
