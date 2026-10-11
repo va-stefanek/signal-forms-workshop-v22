@@ -1,11 +1,11 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { form } from '@angular/forms/signals';
+import { FormField, email, form, maxLength, minLength, pattern, required } from '@angular/forms/signals';
 import { Attendee } from '../../api/models';
 
 /**
- * STEP 1: your first Signal Form.
- * For now the form model IS the domain model (`Attendee`), on purpose.
+ * STEP 1: the form model IS the domain model (on purpose).
+ * Step 2 shows where that stops working.
  */
 export const EMPTY_ATTENDEE: Attendee = {
   firstName: '',
@@ -17,16 +17,20 @@ export const EMPTY_ATTENDEE: Attendee = {
 
 @Component({
   selector: 'app-registration-page',
-  // TODO 1.3: import FormField so the template can use [formField]
-  imports: [JsonPipe],
+  imports: [FormField, JsonPipe],
   templateUrl: './registration-page.html',
 })
 export class RegistrationPage {
   protected readonly attendeeModel = signal<Attendee>({ ...EMPTY_ATTENDEE });
 
-  // TODO 1.1: add a schema function as the second argument of form():
-  //   - firstName, lastName, email, username are required (with messages)
-  //   - email has a valid email format
-  //   - username: 3 to 20 characters, only /^[a-z0-9_]+$/
-  readonly attendeeForm = form(this.attendeeModel);
+  readonly attendeeForm = form(this.attendeeModel, (a) => {
+    required(a.firstName, { message: 'First name is required' });
+    required(a.lastName, { message: 'Last name is required' });
+    required(a.email, { message: 'Email is required' });
+    email(a.email, { message: 'Enter a valid email address' });
+    required(a.username, { message: 'Username is required' });
+    minLength(a.username, 3);
+    maxLength(a.username, 20);
+    pattern(a.username, /^[a-z0-9_]+$/, { message: 'Use lowercase letters, digits and _ only' });
+  });
 }

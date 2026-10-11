@@ -2,34 +2,61 @@
   <section class="card">
     <h2>Attendee</h2>
     <div class="grid">
-      <!-- TODO 1.2: bind each input with [formField] -->
-      <!-- TODO 1.4: show errors with getError(kind), only after the field was touched -->
-      <!--            (for username use the typed errors: err.minLength, err.maxLength) -->
       <div class="field">
         <label for="firstName">First name</label>
-        <input id="firstName" />
+        <input id="firstName" [formField]="attendeeForm.firstName" />
+        @if (attendeeForm.firstName().touched() && attendeeForm.firstName().getError('required'); as err) {
+          <span class="error">{{ err.message }}</span>
+        }
       </div>
 
       <div class="field">
         <label for="lastName">Last name</label>
-        <input id="lastName" />
+        <input id="lastName" [formField]="attendeeForm.lastName" />
+        @if (attendeeForm.lastName().touched() && attendeeForm.lastName().getError('required'); as err) {
+          <span class="error">{{ err.message }}</span>
+        }
       </div>
 
       <div class="field">
         <label for="email">Email</label>
-        <input id="email" type="email" />
+        <input id="email" type="email" [formField]="attendeeForm.email" />
+        @let emailField = attendeeForm.email();
+        @if (emailField.touched()) {
+          @if (emailField.getError('required'); as err) {
+            <span class="error">{{ err.message }}</span>
+          } @else if (emailField.getError('email'); as err) {
+            <span class="error">{{ err.message }}</span>
+          }
+        }
       </div>
 
       <div class="field">
         <label for="username">Username</label>
-        <input id="username" />
+        <input id="username" [formField]="attendeeForm.username" />
+        @let usernameField = attendeeForm.username();
+        @if (usernameField.touched()) {
+          @if (usernameField.getError('required'); as err) {
+            <span class="error">{{ err.message }}</span>
+          }
+          <!-- getError() narrows the type: minLength / maxLength are available -->
+          @if (usernameField.getError('minLength'); as err) {
+            <span class="error">At least {{ err.minLength }} characters</span>
+          }
+          @if (usernameField.getError('maxLength'); as err) {
+            <span class="error">At most {{ err.maxLength }} characters</span>
+          }
+          @if (usernameField.getError('pattern'); as err) {
+            <span class="error">{{ err.message }}</span>
+          }
+        }
       </div>
     </div>
   </section>
 
   <div class="actions">
-    <!-- TODO 1.5: disable the button while the form is invalid -->
-    <button type="submit" class="primary">Register</button>
+    <button type="submit" class="primary" [disabled]="attendeeForm().invalid()">Register</button>
+    <span class="status">{{ attendeeForm().valid() ? 'Ready to submit' : 'Fill in the required fields' }}</span>
   </div>
 </form>
 
