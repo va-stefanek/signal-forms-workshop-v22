@@ -6,7 +6,14 @@
   @if (loading()) { <span class="status">Loading…</span> }
 </div>
 
-<form novalidate>
+@if (lastSaved(); as saved) {
+  <div class="banner ok" role="status">Saved registration #{{ saved.id }}</div>
+}
+@for (error of formErrors(); track error.kind) {
+  <div class="banner err" role="alert">{{ error.message }}</div>
+}
+
+<form [formRoot]="registrationForm">
   <section class="card">
     <h2>Attendee</h2>
     <div class="grid">
@@ -33,7 +40,19 @@
       <div class="field">
         <label for="username">Username</label>
         <input id="username" [formField]="f.attendee.username" />
+        @let username = f.attendee.username();
+        @if (username.pending()) {
+          <span class="status">Checking availability…</span>
+        } @else if (username.valid() && username.value()) {
+          <span class="status ok">Username available</span>
+        }
         <app-field-errors [field]="f.attendee.username" />
+        <div class="actions">
+          <button type="button" class="link" (click)="recheckUsername()">Re-check</button>
+          <button type="button" class="link" (click)="simulateUsernameTakenElsewhere()" [disabled]="!username.value()">
+            Simulate: someone takes it
+          </button>
+        </div>
       </div>
     </div>
   </section>
@@ -124,6 +143,15 @@
       </div>
     }
   </section>
+
+  <div class="actions">
+    <button type="submit" class="primary" [disabled]="registrationForm().submitting()">
+      {{ registrationForm().submitting() ? 'Saving…' : 'Register' }}
+    </button>
+    @if (registrationForm().pending()) {
+      <span class="status">Waiting for checks…</span>
+    }
+  </div>
 </form>
 
 <section class="card">
