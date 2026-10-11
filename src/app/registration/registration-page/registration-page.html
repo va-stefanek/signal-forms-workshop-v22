@@ -13,50 +13,15 @@
   <div class="banner err" role="alert">{{ error.message }}</div>
 }
 
-<!-- TODO 4.2: replace the attendee, payment and invoice sections with their subform components,
-     and add a "Companions" section with <app-companions-fields> (TODO 4.3) -->
 <form [formRoot]="registrationForm">
   <section class="card">
     <h2>Attendee</h2>
-    <div class="grid">
-      <div class="field">
-        <label for="firstName">First name</label>
-        <input id="firstName" [formField]="f.attendee.firstName" />
-        <app-field-errors [field]="f.attendee.firstName" />
-      </div>
-      <div class="field">
-        <label for="lastName">Last name</label>
-        <input id="lastName" [formField]="f.attendee.lastName" />
-        <app-field-errors [field]="f.attendee.lastName" />
-      </div>
-      <div class="field">
-        <label for="email">Email</label>
-        <input id="email" type="email" [formField]="f.attendee.email" />
-        <app-field-errors [field]="f.attendee.email" />
-      </div>
-      <div class="field">
-        <label for="confirmEmail">Repeat email</label>
-        <input id="confirmEmail" type="email" [formField]="f.attendee.confirmEmail" />
-        <app-field-errors [field]="f.attendee.confirmEmail" />
-      </div>
-      <div class="field">
-        <label for="username">Username</label>
-        <input id="username" [formField]="f.attendee.username" />
-        @let username = f.attendee.username();
-        @if (username.pending()) {
-          <span class="status">Checking availability…</span>
-        } @else if (username.valid() && username.value()) {
-          <span class="status ok">Username available</span>
-        }
-        <app-field-errors [field]="f.attendee.username" />
-        <div class="actions">
-          <button type="button" class="link" (click)="recheckUsername()">Re-check</button>
-          <button type="button" class="link" (click)="simulateUsernameTakenElsewhere()" [disabled]="!username.value()">
-            Simulate: someone takes it
-          </button>
-        </div>
-      </div>
-    </div>
+    <app-attendee-fields [attendee]="f.attendee" />
+  </section>
+
+  <section class="card">
+    <h2>Companions</h2>
+    <app-companions-fields [companions]="f.companions" />
   </section>
 
   <section class="card">
@@ -69,81 +34,12 @@
 
   <section class="card">
     <h2>Payment</h2>
-    <div class="actions" role="radiogroup" aria-label="Payment method">
-      <label class="option"><input type="radio" value="card" [formField]="f.payment.method" /> Card</label>
-      <label class="option"><input type="radio" value="transfer" [formField]="f.payment.method" /> Bank transfer</label>
-    </div>
-    <app-field-errors [field]="f.payment.method" />
-
-    @switch (f.payment.method().value()) {
-      @case ('card') {
-        <div class="grid spaced">
-          <div class="field">
-            <label for="cardholderName">Cardholder name</label>
-            <input id="cardholderName" [formField]="f.payment.card.cardholderName" />
-            <app-field-errors [field]="f.payment.card.cardholderName" />
-          </div>
-          <div class="field">
-            <label for="cardNumber">Card number</label>
-            <input id="cardNumber" inputmode="numeric" [formField]="f.payment.card.cardNumber" />
-            <app-field-errors [field]="f.payment.card.cardNumber" />
-          </div>
-          <div class="field">
-            <label for="expiry">Expiry (MM/YY)</label>
-            <input id="expiry" [formField]="f.payment.card.expiry" />
-            <app-field-errors [field]="f.payment.card.expiry" />
-          </div>
-        </div>
-      }
-      @case ('transfer') {
-        <div class="grid spaced">
-          <div class="field">
-            <label for="payerName">Payer name</label>
-            <input id="payerName" [formField]="f.payment.transfer.payerName" />
-            <app-field-errors [field]="f.payment.transfer.payerName" />
-          </div>
-          <div class="field">
-            <label for="iban">IBAN</label>
-            <input id="iban" [formField]="f.payment.transfer.iban" />
-            <app-field-errors [field]="f.payment.transfer.iban" />
-          </div>
-        </div>
-      }
-    }
+    <app-payment-fields [payment]="f.payment" />
   </section>
 
   <section class="card">
     <h2>Invoice</h2>
-    <label class="option"><input type="checkbox" [formField]="f.wantsInvoice" /> I need an invoice</label>
-    @if (f.wantsInvoice().value()) {
-      <div class="grid spaced">
-        <div class="field">
-          <label for="companyName">Company name</label>
-          <input id="companyName" [formField]="f.invoice.name" />
-          <app-field-errors [field]="f.invoice.name" />
-        </div>
-        <div class="field">
-          <label for="nip">NIP</label>
-          <input id="nip" [formField]="f.invoice.nip" />
-          <app-field-errors [field]="f.invoice.nip" />
-        </div>
-        <div class="field">
-          <label for="street">Street</label>
-          <input id="street" [formField]="f.invoice.street" />
-          <app-field-errors [field]="f.invoice.street" />
-        </div>
-        <div class="field">
-          <label for="city">City</label>
-          <input id="city" [formField]="f.invoice.city" />
-          <app-field-errors [field]="f.invoice.city" />
-        </div>
-        <div class="field">
-          <label for="postalCode">Postal code</label>
-          <input id="postalCode" [formField]="f.invoice.postalCode" />
-          <app-field-errors [field]="f.invoice.postalCode" />
-        </div>
-      </div>
-    }
+    <app-invoice-fields [wantsInvoice]="f.wantsInvoice" [invoice]="f.invoice" />
   </section>
 
   <div class="actions">

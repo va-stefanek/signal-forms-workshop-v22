@@ -1,1 +1,12 @@
-<p class="todo">TODO 4.6: phone input</p>
+<input
+  #input
+  type="tel"
+  autocomplete="tel"
+  [id]="inputId()"
+  [value]="rawValue()"
+  [disabled]="disabled()"
+  [class.is-invalid]="touched() && invalid()"
+  [attr.aria-invalid]="touched() && invalid()"
+  (input)="onInput($event)"
+  (blur)="touch.emit()"
+/>

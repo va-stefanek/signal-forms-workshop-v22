@@ -1,10 +1,11 @@
 import { Component, input } from '@angular/core';
-import { FieldTree } from '@angular/forms/signals';
+import { FieldTree, FormField } from '@angular/forms/signals';
 import { CompanyData } from '../../../api/models';
+import { FieldErrors } from '../../../shared/field-errors/field-errors';
 
-/** TODO 4.2: move the invoice section of registration-page.html into invoice-fields.html (checkbox + company fields) */
 @Component({
   selector: 'app-invoice-fields',
+  imports: [FormField, FieldErrors],
   templateUrl: './invoice-fields.html',
 })
 export class InvoiceFields {

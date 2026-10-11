@@ -1,1 +1,25 @@
-<p class="todo">TODO 4.3: companions</p>
+<!-- track the FIELD itself: tracking item().email().value() causes NG01904 orphan fields -->
+@for (companion of companions(); track companion; let i = $index) {
+  <div class="companion">
+    <div class="row">
+      <div class="field">
+        <label [for]="'companion-first-' + i">First name</label>
+        <input [id]="'companion-first-' + i" [formField]="companion.firstName" />
+        <app-field-errors [field]="companion.firstName" />
+      </div>
+      <div class="field">
+        <label [for]="'companion-last-' + i">Last name</label>
+        <input [id]="'companion-last-' + i" [formField]="companion.lastName" />
+        <app-field-errors [field]="companion.lastName" />
+      </div>
+      <div class="field">
+        <label [for]="'companion-email-' + i">Email</label>
+        <input [id]="'companion-email-' + i" type="email" [formField]="companion.email" />
+        <app-field-errors [field]="companion.email" />
+      </div>
+      <button type="button" (click)="remove(i)" [attr.aria-label]="'Remove companion ' + (i + 1)">Remove</button>
+    </div>
+  </div>
+}
+<app-field-errors [field]="companions()" />
+<button type="button" (click)="add()" [disabled]="companions().length >= max">+ Add companion</button>

@@ -1,5 +1,6 @@
 import {
   apply,
+  applyEach,
   applyWhen,
   applyWhenValue,
   email,
@@ -16,17 +17,16 @@ import { AttendeeForm, RegistrationForm } from './registration-form.model';
 
 export const MAX_COMPANIONS = 3;
 
-/**
- * TODO 4.1: move the shared person rules (firstName, lastName, email) here
- * and reuse them with apply() in attendeeSchema AND for every companion.
- */
-export const personSchema = schema<Person>((p) => {});
+/** Reused for the attendee AND every companion */
+export const personSchema = schema<Person>((p) => {
+  required(p.firstName, { message: 'First name is required' });
+  required(p.lastName, { message: 'Last name is required' });
+  required(p.email, { message: 'Email is required' });
+  email(p.email, { message: 'Enter a valid email address' });
+});
 
 export const attendeeSchema = schema<AttendeeForm>((a) => {
-  required(a.firstName, { message: 'First name is required' });
-  required(a.lastName, { message: 'Last name is required' });
-  required(a.email, { message: 'Email is required' });
-  email(a.email, { message: 'Enter a valid email address' });
+  apply(a, personSchema);
   required(a.username, { message: 'Username is required' });
   minLength(a.username, 3);
   maxLength(a.username, 20);
@@ -71,10 +71,17 @@ export const registrationSchema = schema<RegistrationForm>((f) => {
     onError: () => ({ kind: 'usernameCheckFailed', message: 'Could not check the username, try again' }),
   });
 
-  // TODO 4.4 companions:
-  //   - at most MAX_COMPANIONS items (hint: maxLength works on arrays)
-  //   - personSchema for every item (applyEach)
-  //   - a companion email must differ from the attendee email (kind: 'duplicateEmail', case-insensitive)
+  // Arrays: the same schema for every item, plus rules on the array itself
+  maxLength(f.companions, MAX_COMPANIONS, { message: `At most ${MAX_COMPANIONS} companions` });
+  applyEach(f.companions, (companion) => {
+    apply(companion, personSchema);
+    // An item rule may read fields outside the array
+    validate(companion.email, ({ value, valueOf }) =>
+      value() && value().toLowerCase() === valueOf(f.attendee.email).toLowerCase()
+        ? { kind: 'duplicateEmail', message: 'Companions need their own email' }
+        : null,
+    );
+  });
 
   // Group-level rule on the agenda array
   validate(f.agenda, ({ value }) =>

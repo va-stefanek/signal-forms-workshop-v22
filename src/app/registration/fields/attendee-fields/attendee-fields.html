@@ -1,1 +1,46 @@
-<p class="todo">TODO 4.2: attendee fields</p>
+@let a = attendee();
+<div class="grid">
+  <div class="field">
+    <label for="firstName">First name</label>
+    <input id="firstName" [formField]="a.firstName" />
+    <app-field-errors [field]="a.firstName" />
+  </div>
+  <div class="field">
+    <label for="lastName">Last name</label>
+    <input id="lastName" [formField]="a.lastName" />
+    <app-field-errors [field]="a.lastName" />
+  </div>
+  <div class="field">
+    <label for="email">Email</label>
+    <input id="email" type="email" [formField]="a.email" />
+    <app-field-errors [field]="a.email" />
+  </div>
+  <div class="field">
+    <label for="confirmEmail">Repeat email</label>
+    <input id="confirmEmail" type="email" [formField]="a.confirmEmail" />
+    <app-field-errors [field]="a.confirmEmail" />
+  </div>
+  <div class="field">
+    <label for="username">Username</label>
+    <input id="username" [formField]="a.username" />
+    @let username = a.username();
+    @if (username.pending()) {
+      <span class="status">Checking availability…</span>
+    } @else if (username.valid() && username.value()) {
+      <span class="status ok">Username available</span>
+    }
+    <app-field-errors [field]="a.username" />
+    <div class="actions">
+      <button type="button" class="link" (click)="recheckUsername()">Re-check</button>
+      <button type="button" class="link" (click)="simulateUsernameTakenElsewhere()" [disabled]="!username.value()">
+        Simulate: someone takes it
+      </button>
+    </div>
+  </div>
+  <div class="field">
+    <label for="phone">Phone (optional)</label>
+    <app-phone-input inputId="phone" [formField]="a.phone" />
+    <span class="hint">9 digits for Poland, or +country code</span>
+    <app-field-errors [field]="a.phone" />
+  </div>
+</div>

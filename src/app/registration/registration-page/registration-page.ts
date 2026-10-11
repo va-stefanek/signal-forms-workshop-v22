@@ -1,18 +1,22 @@
 import { Component, computed, inject, linkedSignal, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
-import { FormField, FormRoot, apply, disabled, form } from '@angular/forms/signals';
+import { FormRoot, apply, disabled, form } from '@angular/forms/signals';
 import { Agenda, Registration } from '../../api/models';
 import { RegistrationApi } from '../../api/registration-api';
 import { FieldErrors } from '../../shared/field-errors/field-errors';
 import { AgendaPicker } from '../agenda-picker/agenda-picker';
+import { AttendeeFields } from '../fields/attendee-fields/attendee-fields';
+import { CompanionsFields } from '../fields/companions-fields/companions-fields';
+import { InvoiceFields } from '../fields/invoice-fields/invoice-fields';
+import { PaymentFields } from '../fields/payment-fields/payment-fields';
 import { RegistrationForm, domainToForm, emptyRegistrationForm, formToDomain } from '../form/registration-form.model';
 import { registrationSchema } from '../form/registration.schema';
 import { serverErrorsToTree } from '../form/server-errors';
 
 @Component({
   selector: 'app-registration-page',
-  imports: [FormField, FormRoot, JsonPipe, FieldErrors, AgendaPicker],
+  imports: [FormRoot, JsonPipe, FieldErrors, AgendaPicker, AttendeeFields, CompanionsFields, PaymentFields, InvoiceFields],
   templateUrl: './registration-page.html',
 })
 export class RegistrationPage {
@@ -75,14 +79,4 @@ export class RegistrationPage {
   readonly formErrors = computed(() =>
     this.registrationForm().errors().filter((e) => e.fieldTree === this.registrationForm),
   );
-
-  recheckUsername(): void {
-    this.registrationForm.attendee.username().reloadValidation();
-  }
-
-  /** Demo for reloadValidation(): the value did not change, the server state did */
-  async simulateUsernameTakenElsewhere(): Promise<void> {
-    await this.api.takeUsername(this.registrationForm.attendee.username().value());
-    this.recheckUsername();
-  }
 }

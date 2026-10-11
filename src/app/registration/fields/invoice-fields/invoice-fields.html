@@ -1,1 +1,31 @@
-<p class="todo">TODO 4.2: invoice fields</p>
+<label class="option"><input type="checkbox" [formField]="wantsInvoice()" /> I need an invoice</label>
+@if (wantsInvoice()().value()) {
+  @let c = invoice();
+  <div class="grid spaced">
+    <div class="field">
+      <label for="companyName">Company name</label>
+      <input id="companyName" [formField]="c.name" />
+      <app-field-errors [field]="c.name" />
+    </div>
+    <div class="field">
+      <label for="nip">NIP</label>
+      <input id="nip" [formField]="c.nip" />
+      <app-field-errors [field]="c.nip" />
+    </div>
+    <div class="field">
+      <label for="street">Street</label>
+      <input id="street" [formField]="c.street" />
+      <app-field-errors [field]="c.street" />
+    </div>
+    <div class="field">
+      <label for="city">City</label>
+      <input id="city" [formField]="c.city" />
+      <app-field-errors [field]="c.city" />
+    </div>
+    <div class="field">
+      <label for="postalCode">Postal code</label>
+      <input id="postalCode" [formField]="c.postalCode" />
+      <app-field-errors [field]="c.postalCode" />
+    </div>
+  </div>
+}

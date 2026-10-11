@@ -1,1 +1,42 @@
-<p class="todo">TODO 4.2: payment fields</p>
+@let p = payment();
+<div class="actions" role="radiogroup" aria-label="Payment method">
+  <label class="option"><input type="radio" value="card" [formField]="p.method" /> Card</label>
+  <label class="option"><input type="radio" value="transfer" [formField]="p.method" /> Bank transfer</label>
+</div>
+<app-field-errors [field]="p.method" />
+
+@switch (p.method().value()) {
+  @case ('card') {
+    <div class="grid spaced">
+      <div class="field">
+        <label for="cardholderName">Cardholder name</label>
+        <input id="cardholderName" [formField]="p.card.cardholderName" />
+        <app-field-errors [field]="p.card.cardholderName" />
+      </div>
+      <div class="field">
+        <label for="cardNumber">Card number</label>
+        <input id="cardNumber" inputmode="numeric" [formField]="p.card.cardNumber" />
+        <app-field-errors [field]="p.card.cardNumber" />
+      </div>
+      <div class="field">
+        <label for="expiry">Expiry (MM/YY)</label>
+        <input id="expiry" [formField]="p.card.expiry" />
+        <app-field-errors [field]="p.card.expiry" />
+      </div>
+    </div>
+  }
+  @case ('transfer') {
+    <div class="grid spaced">
+      <div class="field">
+        <label for="payerName">Payer name</label>
+        <input id="payerName" [formField]="p.transfer.payerName" />
+        <app-field-errors [field]="p.transfer.payerName" />
+      </div>
+      <div class="field">
+        <label for="iban">IBAN</label>
+        <input id="iban" [formField]="p.transfer.iban" />
+        <app-field-errors [field]="p.transfer.iban" />
+      </div>
+    </div>
+  }
+}
