@@ -11,8 +11,16 @@ import {
   validate,
   validateHttp,
 } from '@angular/forms/signals';
-import { CompanyData } from '../../api/models';
+import { CompanyData, Person } from '../../api/models';
 import { AttendeeForm, RegistrationForm } from './registration-form.model';
+
+export const MAX_COMPANIONS = 3;
+
+/**
+ * TODO 4.1: move the shared person rules (firstName, lastName, email) here
+ * and reuse them with apply() in attendeeSchema AND for every companion.
+ */
+export const personSchema = schema<Person>((p) => {});
 
 export const attendeeSchema = schema<AttendeeForm>((a) => {
   required(a.firstName, { message: 'First name is required' });
@@ -62,6 +70,11 @@ export const registrationSchema = schema<RegistrationForm>((f) => {
       response.available ? null : { kind: 'usernameTaken', message: 'This username is already taken' },
     onError: () => ({ kind: 'usernameCheckFailed', message: 'Could not check the username, try again' }),
   });
+
+  // TODO 4.4 companions:
+  //   - at most MAX_COMPANIONS items (hint: maxLength works on arrays)
+  //   - personSchema for every item (applyEach)
+  //   - a companion email must differ from the attendee email (kind: 'duplicateEmail', case-insensitive)
 
   // Group-level rule on the agenda array
   validate(f.agenda, ({ value }) =>
