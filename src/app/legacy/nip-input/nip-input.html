@@ -1,0 +1,9 @@
+<input
+  [id]="inputId"
+  inputmode="numeric"
+  placeholder="000-000-00-00"
+  [value]="display()"
+  [disabled]="isDisabled()"
+  (input)="onInput($event)"
+  (blur)="onTouched()"
+/>

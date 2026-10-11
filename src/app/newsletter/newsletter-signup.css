@@ -1,0 +1,5 @@
+:host { display: block; }
+
+.tracks { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
+.track { border-color: var(--line); background: var(--surface); font-weight: 500; }
+.track:hover { background: var(--surface-sunken); }

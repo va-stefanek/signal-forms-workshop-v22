@@ -5,7 +5,12 @@ import { FieldErrors } from '../../../shared/field-errors/field-errors';
 import { PhoneInput } from '../../../shared/phone-input/phone-input';
 import { AttendeeForm } from '../../form/registration-form.model';
 
-/** Subform: renders a portion of the parent's field tree, owns no state of its own */
+/**
+ * Subform: renders a portion of the parent's field tree, owns no state of its own.
+ * TODO 5.4: show a required mark (<span class="required-mark" aria-hidden="true">*</span>) in labels of
+ *           required fields, read from the field state. Show HINT metadata in a <span class="hint">:
+ *           add one under username, and replace the hard-coded phone hint.
+ */
 @Component({
   selector: 'app-attendee-fields',
   imports: [FormField, FieldErrors, PhoneInput],

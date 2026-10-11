@@ -10,6 +10,7 @@ const DEFAULT_MESSAGES: Record<string, (e: any) => string> = {
   max: (e) => `Maximum value is ${e.max}`,
   pattern: () => 'Invalid format',
   parse: () => 'Cannot read this value',
+  nipChecksum: () => 'This NIP is not valid (checksum)',
 };
 
 /**

@@ -7,8 +7,17 @@
         <p class="tagline">Registration · Angular Signal Forms workshop</p>
       </div>
     </div>
+    <nav class="tabs" aria-label="Sections">
+      <button type="button" [attr.aria-pressed]="view() === 'registration'" (click)="view.set('registration')">Registration</button>
+      <button type="button" [attr.aria-pressed]="view() === 'feedback'" (click)="view.set('feedback')">Feedback (legacy)</button>
+      <button type="button" [attr.aria-pressed]="view() === 'newsletter'" (click)="view.set('newsletter')">Newsletter</button>
+    </nav>
   </div>
 </header>
 <main class="page">
-  <app-registration-page />
+  @switch (view()) {
+    @case ('registration') { <app-registration-page /> }
+    @case ('feedback') { <app-feedback-form /> }
+    @case ('newsletter') { <app-newsletter-signup /> }
+  }
 </main>

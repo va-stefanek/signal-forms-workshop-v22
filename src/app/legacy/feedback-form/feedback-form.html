@@ -1,0 +1,38 @@
+@if (sent()) {
+  <div class="banner ok" role="status">Thank you for your feedback!</div>
+}
+<form class="card" [formGroup]="feedback" (ngSubmit)="send()">
+  <h2>Post-conference feedback</h2>
+  <div class="grid">
+    <div class="field">
+      <label for="rating">Rating</label>
+      <select id="rating" formControlName="rating">
+        <option [ngValue]="null">Choose…</option>
+        @for (n of [5, 4, 3, 2, 1]; track n) {
+          <option [ngValue]="n">{{ n }}</option>
+        }
+      </select>
+      @if (feedback.controls.rating.touched && feedback.controls.rating.hasError('required')) {
+        <span class="error">Please rate the conference</span>
+      }
+    </div>
+    <div class="field">
+      <label for="feedbackEmail">Email</label>
+      <input id="feedbackEmail" type="email" formControlName="email" />
+      @let emailCtrl = feedback.controls.email;
+      @if (emailCtrl.touched && emailCtrl.hasError('required')) {
+        <span class="error">Email is required</span>
+      }
+      @if (emailCtrl.touched && emailCtrl.hasError('email')) {
+        <span class="error">Enter a valid email address</span>
+      }
+    </div>
+  </div>
+  <div class="field spaced">
+    <label for="comment">Comment</label>
+    <input id="comment" formControlName="comment" />
+  </div>
+  <div class="actions spaced">
+    <button type="submit" class="primary">Send</button>
+  </div>
+</form>

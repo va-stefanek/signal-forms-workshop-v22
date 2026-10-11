@@ -1,0 +1,33 @@
+@if (subscribed(); as s) {
+  <div class="banner ok" role="status">Subscribed {{ s.email }} to the {{ s.track }} track</div>
+}
+<form class="card" [formRoot]="newsletterForm">
+  <h2>Stay in touch</h2>
+  <div class="grid">
+    <div class="field">
+      <label for="newsletterName">Name</label>
+      <input id="newsletterName" [formField]="newsletterForm.name" />
+      <app-field-errors [field]="newsletterForm.name" />
+    </div>
+    <div class="field">
+      <label for="newsletterEmail">Email</label>
+      <input id="newsletterEmail" type="email" [formField]="newsletterForm.email" />
+      <app-field-errors [field]="newsletterForm.email" />
+    </div>
+  </div>
+  <fieldset class="field spaced">
+    <legend>Track</legend>
+    <div class="tracks">
+      @for (track of tracks; track track.id) {
+        <label class="option track"><input type="radio" [value]="track.id" [formField]="newsletterForm.track" /> {{ track.label }}</label>
+      }
+    </div>
+    <app-field-errors [field]="newsletterForm.track" />
+  </fieldset>
+  <label class="option spaced">
+    <input type="checkbox" [formField]="newsletterForm.weekly" /> Weekly digest instead of monthly
+  </label>
+  <div class="actions spaced">
+    <button type="submit" class="primary">Subscribe</button>
+  </div>
+</form>

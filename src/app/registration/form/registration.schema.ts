@@ -31,6 +31,7 @@ export const attendeeSchema = schema<AttendeeForm>((a) => {
   minLength(a.username, 3);
   maxLength(a.username, 20);
   pattern(a.username, /^[a-z0-9_]+$/, { message: 'Use lowercase letters, digits and _ only' });
+  // TODO 5.4: HINT metadata (shared/hint.ts) for username and phone
 
   // Cross-field: depends on a.email, re-runs automatically when it changes
   required(a.confirmEmail, { message: 'Repeat your email' });
@@ -45,6 +46,7 @@ export const companySchema = schema<CompanyData>((c) => {
   required(c.name, { message: 'Company name is required' });
   required(c.nip, { message: 'NIP is required' });
   pattern(c.nip, /^\d{10}$/, { message: 'NIP has 10 digits' });
+  // TODO 5.4: HINT metadata for nip
   required(c.street, { message: 'Street is required' });
   required(c.city, { message: 'City is required' });
   required(c.postalCode, { message: 'Postal code is required' });
